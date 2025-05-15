@@ -2,6 +2,7 @@ export default {
   expo: {
     name: "frontend",
     slug: "frontend",
+    scheme: "my-app",
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/icon.png",
