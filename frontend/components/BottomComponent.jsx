@@ -7,7 +7,6 @@ const BottomComponent = () => {
   const snapPoints = useMemo(() => ['30%', '100%'], []);
 
   console.log("Bottom component rendered");
-
   return (
     <BottomSheet ref={bottomSheetRef} index={0} snapPoints={snapPoints}>
       <View style={styles.contentContainer}>
