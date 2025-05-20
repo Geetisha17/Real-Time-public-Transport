@@ -45,7 +45,10 @@ export default function BottomNav({ activeTab, setActiveTab }) {
 
         <TouchableOpacity
           style={styles.icon}
-          onPress={() => setActiveTab('favorites')}
+          onPress={() => {
+            setActiveTab('favorites');
+            router.push('/notification');
+          }}
         >
           <Ionicons
             name="heart"
@@ -59,7 +62,10 @@ export default function BottomNav({ activeTab, setActiveTab }) {
 
         <TouchableOpacity
           style={styles.icon}
-          onPress={() => setActiveTab('profile')}
+          onPress={() => {
+            setActiveTab('profile');
+            router.push('/profile');
+          }}
         >
           <Ionicons
             name="person"

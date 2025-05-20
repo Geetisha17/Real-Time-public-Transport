@@ -75,6 +75,19 @@ export default function HomeScreen() {
           </TouchableOpacity>
         )}
       />
+        <View style={styles.quickButtonsContainer}>
+          <TouchableOpacity style={styles.quickButton} onPress={() => router.push('/smart-suggestion')}>
+            <Text style={styles.quickButtonText}>
+              View Smart Suggestions
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.quickButton} onPress={() => router.push('/saved-routes')}>
+            <Text style={ styles.quickButtonText }>
+              View Saved Routes
+            </Text>
+          </TouchableOpacity>
+        </View>
 
         <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
     </KeyboardAvoidingView>
