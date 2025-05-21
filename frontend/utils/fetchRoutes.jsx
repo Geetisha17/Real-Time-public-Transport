@@ -3,7 +3,7 @@ import axios from 'axios';
 export const fetchRoutes = async(from,to)=>{
 
     try{
-        const res = await axios.get(`https://8080-geetisha17-realtimepubl-je8j9g2yf61.ws-us118.gitpod.io/api/route`,{
+        const res = await axios.get(`https://localhost:8080/api/route`,{
             params:{from, to},
         });
 

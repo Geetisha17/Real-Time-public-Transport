@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,39 +8,33 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-
-const suggestions = [
-  {
-    id: 1,
-    title: 'Fastest Route Today',
-    summary: 'Bus 102 via MG Road (20 mins)',
-    route: 'Bus 102',
-  },
-  {
-    id: 2,
-    title: 'Least Crowded Right Now',
-    summary: 'Metro Blue Line (light crowd)',
-    route: 'Metro Blue Line',
-  },
-  {
-    id: 3,
-    title: 'Alternate Route via Train',
-    summary: 'Train 8A + walk (22 mins)',
-    route: 'Train 8A',
-  },
-];
+import axios from 'axios';
 
 export default function SmartSuggestionsScreen() {
+  const [suggestions, setSuggestions] = useState([]);
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/api/suggestions');
+        setSuggestions(response.data);
+      } catch (error) {
+        console.log('Suggestion fetch error:', error.message);
+      }
+    };
+
+    fetchSuggestions();
+  }, []);
 
   const handleOpenMap = () => {
     router.push('/map');
   };
 
-  const handleRouteDetail = (routeName) => {
+  const handleRouteDetail = (from, to) => {
     router.push({
       pathname: '/route-detail',
-      params: { route: routeName },
+      params: { from, to },
     });
   };
 
@@ -48,10 +42,13 @@ export default function SmartSuggestionsScreen() {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Smart Suggestions</Text>
 
-      {suggestions.map((item) => (
-        <View key={item.id} style={styles.card}>
+      {suggestions.map((item, idx) => (
+        <View key={idx} style={styles.card}>
           <Text style={styles.cardTitle}>{item.title}</Text>
-          <Text style={styles.cardSummary}>{item.summary}</Text>
+          <Text style={styles.cardSummary}>{item.from} → {item.to}</Text>
+          <Text style={styles.cardSummary}>
+            {item.estimatedTime || item.crowdLevel}
+          </Text>
 
           <View style={styles.buttonRow}>
             <TouchableOpacity style={styles.mapButton} onPress={handleOpenMap}>
@@ -61,7 +58,7 @@ export default function SmartSuggestionsScreen() {
 
             <TouchableOpacity
               style={styles.detailButton}
-              onPress={() => handleRouteDetail(item.route)}
+              onPress={() => handleRouteDetail(item.from, item.to)}
             >
               <Ionicons name="information-circle-outline" size={18} color="#00C851" />
               <Text style={[styles.buttonText, { color: '#00C851' }]}>Details</Text>
