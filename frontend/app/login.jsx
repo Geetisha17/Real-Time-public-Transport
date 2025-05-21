@@ -12,7 +12,7 @@ export default function LoginScreen() {
       Alert.alert('Missing Fields', 'Please enter both email and password.');
       return;
     }
-    router.replace('/home'); 
+    router.replace('/home');
   };
 
   return (

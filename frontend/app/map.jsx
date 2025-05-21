@@ -1,11 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
-  Modal,
   StyleSheet,
-  Animated as RNAnimated,
   Platform,
 } from 'react-native';
 import MapView, { Marker, Callout, PROVIDER_GOOGLE } from 'react-native-maps';
@@ -36,16 +34,8 @@ const dummyVehicles = [
 
 export default function LiveMapScreen() {
   const [filter, setFilter] = useState('all');
-  const [reportModal, setReportModal] = useState(false);
   const [activeTab, setActiveTab] = useState('map');
   const router = useRouter(); 
-
-  const scrollY = useRef(new RNAnimated.Value(0)).current;
-  const navTranslate = scrollY.interpolate({
-    inputRange: [0, 50],
-    outputRange: [0, 100],
-    extrapolate: 'clamp',
-  });
 
   const filteredVehicles = dummyVehicles.filter(vehicle => {
     if (filter === 'all') return true;
@@ -108,7 +98,7 @@ export default function LiveMapScreen() {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.advancedFilters}>
+      {/* <View style={styles.advancedFilters}>
         <TouchableOpacity style={styles.filterPill}>
           <Text style={styles.filterText}>Sector 22</Text>
         </TouchableOpacity>
@@ -118,7 +108,7 @@ export default function LiveMapScreen() {
         <TouchableOpacity style={styles.filterPill}>
           <Text style={styles.filterText}>Route 18A</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
 
       <TouchableOpacity
               style={styles.floatingBtn}
@@ -128,20 +118,17 @@ export default function LiveMapScreen() {
               <Text style={styles.floatingText}>Report Crowd</Text>
       </TouchableOpacity>
 
-      <Modal visible={reportModal} transparent animationType="slide">
-        <View style={styles.modalContainer}>
-          <View style={styles.modalBox}>
-            <Text style={styles.modalTitle}>Report Crowd Level</Text>
-            <TouchableOpacity onPress={() => setReportModal(false)}>
-              <Text style={styles.close}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      <TouchableOpacity
+        style={styles.floatingBtn}
+        onPress={() => router.push('/report-crowd')}  
+      >
+        <Ionicons name="megaphone-outline" size={24} color="#fff" />
+        <Text style={styles.floatingText}>Report Crowd</Text>
+      </TouchableOpacity>
 
-      <RNAnimated.View style={[styles.bottomNavWrapper, { transform: [{ translateY: navTranslate }] }]}>
+      <View style={styles.bottomNavWrapper}>
         <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
-      </RNAnimated.View>
+      </View>
     </View>
   );
 }

@@ -13,7 +13,7 @@ export default function SignupScreen() {
       Alert.alert('Missing Fields', 'Please fill in all the fields.');
       return;
     }
-    router.replace('/home');
+    router.replace('/home'); 
   };
 
   return (

@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  Image,
   Animated,
   StatusBar,
 } from 'react-native';
@@ -21,7 +20,7 @@ export default function SplashScreen() {
     }).start();
 
     setTimeout(() => {
-      router.replace('/login');
+      router.replace('/signup');
     }, 2500);
   }, []);
 
