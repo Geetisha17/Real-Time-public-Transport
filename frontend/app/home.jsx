@@ -8,9 +8,11 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import BottomNav from '../components/BottomNav';
+import { fetchRoutes } from '../utils/fetchRoutes';
 
 const recentSearches = [
   'Sector 22 to Rajiv Chowk',
@@ -24,11 +26,30 @@ export default function HomeScreen() {
   
   const router = useRouter();
 
-  const handleSearch = () => {
+  const handleSearch = async() => {
     if (destination.trim() !== '') {
+
+      const [from,to] = destination.split(' to ');
+      
+      if(!from || !to)
+      {
+        Alert.alert('Pelase enter route as: Point A to Point B');
+        return;
+      }
+
+      const route = await fetchRoutes(from.trim(),to.trim());
+      if(!route)
+      {
+        Alert.alert('No route found');
+        return;
+      }
       router.push({
         pathname: '/route-detail',
-        params: { route: destination },
+        params: { 
+          polyline: route.polyline,
+          duration: route.duration,
+          steps: JSON.stringify(route.steps),
+         },
       });
     }
   };
