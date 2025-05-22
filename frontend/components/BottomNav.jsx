@@ -29,25 +29,8 @@ export default function BottomNav({ activeTab, setActiveTab }) {
         <TouchableOpacity
           style={styles.icon}
           onPress={() => {
-            setActiveTab('map');
-            router.push('/map');
-          }}
-        >
-          <Ionicons
-            name="map"
-            size={24}
-            color={activeTab === 'map' ? '#00C851' : '#aaa'}
-          />
-          <Text style={activeTab === 'map' ? styles.navItemActive : styles.navItem}>
-            Map
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.icon}
-          onPress={() => {
             setActiveTab('favorites');
-            router.push('/notification');
+            router.push('/emergency');
           }}
         >
           <Ionicons

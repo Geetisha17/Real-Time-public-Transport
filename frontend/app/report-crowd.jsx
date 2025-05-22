@@ -10,22 +10,33 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import axios from 'axios';
 
 export default function ReportCrowdScreen() {
   const [selectedLevel, setSelectedLevel] = useState(null);
   const [note, setNote] = useState('');
+  const [stopName,setStopName] = useState('');
   const router = useRouter();
 
-  const handleSubmit = () => {
-    if (!selectedLevel) {
-      showToast('Please select crowd level');
+  const handleSubmit = async () => {
+    if (!selectedLevel || !stopName.trim()) {
+      showToast('Please select crowd level and stop Name');
       return;
     }
-
-    console.log('Submitting:', { level: selectedLevel, note });
-
-    showToast('Thank you for your feedback!');
-    setTimeout(() => router.back(), 1000);
+  
+    try {
+      await axios.post('https://8080-geetisha17-realtimepubl-je8j9g2yf61.ws-us118.gitpod.io/api/crowd', {
+        stopName,
+        crowdLevel: selectedLevel.toUpperCase(),
+        note,
+      });
+  
+      showToast('Thank you for your feedback!');
+      setTimeout(() => router.back(), 1000);
+    } catch (err) {
+      console.error(err.message);
+      showToast('Failed to submit report');
+    }
   };
 
   const showToast = (msg) => {
@@ -71,6 +82,13 @@ export default function ReportCrowdScreen() {
           <Text style={styles.buttonText}>Crowded</Text>
         </TouchableOpacity>
       </View>
+      <TextInput
+      style={styles.forStop}
+      placeholder='Enter Stop Name'
+      placeholderTextColor="#aaa"
+      value={stopName}
+      onChangeText={setStopName}
+      />
 
       <TextInput
         style={styles.input}
@@ -124,9 +142,15 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 14,
     color: '#fff',
-    height: 100,
     marginBottom: 20,
     textAlignVertical: 'top',
+  },
+  forStop:{
+    padding: 14,
+    backgroundColor: '#1e1e1e',
+    borderRadius: 10,
+    marginBottom: 20,
+    color: '#fff',
   },
   submitButton: {
     backgroundColor: '#00C851',

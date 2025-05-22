@@ -1,13 +1,18 @@
 const axios = require('axios');
 
 exports.getRoute = async (req, res) => {
-  const { from, to } = req.query;
+  const { from, to, mode, transit_mode } = req.query;
 
-  if (!from || !to) {
-    return res.status(400).json({ error: 'From and To are required' });
+  if (!from || !to || !mode) {
+    return res.status(400).json({ error: 'From, To, and Mode are required' });
   }
 
-  const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${from}&destination=${to}&mode=transit&alternatives=true&key=${process.env.GOOGLE_API_KEY}`;
+  const baseUrl = `https://maps.googleapis.com/maps/api/directions/json`;
+  let url = `${baseUrl}?origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&mode=${mode}&key=${process.env.GOOGLE_API_KEY}&alternatives=true`;
+
+  if (mode === 'transit' && transit_mode) {
+    url += `&transit_mode=${transit_mode}`;
+  }
 
   try {
     const response = await axios.get(url);

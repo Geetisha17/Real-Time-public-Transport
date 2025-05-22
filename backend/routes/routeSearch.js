@@ -1,11 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const {
-  submitCrowdReport,
-  getCrowdData
-} = require('../controllers/crowdReportController');
+  getRoute
+} = require('../controllers/routeSearchContoller');
 
-router.post('/', submitCrowdReport);
-router.get('/', getCrowdData);
+router.get('/', getRoute);
 
 module.exports = router;

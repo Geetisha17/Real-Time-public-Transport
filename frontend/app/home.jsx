@@ -5,112 +5,133 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  FlatList,
   KeyboardAvoidingView,
   Platform,
   Alert,
+  Modal,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import BottomNav from '../components/BottomNav';
 import { fetchRoutes } from '../utils/fetchRoutes';
 
-const recentSearches = [
-  'Sector 22 to Rajiv Chowk',
-  'Home to Cyberhub',
-  'Noida City Center to Connaught Place',
-];
-
 export default function HomeScreen() {
-  const [destination, setDestination] = useState('');
-  const [activeTab,setActiveTab] = useState('home');
-  
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
+  const [mode, setMode] = useState('transit');
+  const [transitSubMode, setTransitSubMode] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [showSubOptions, setShowSubOptions] = useState(false);
+  const [activeTab, setActiveTab] = useState('home');
+  const [latestRoute, setLatestRoute] = useState(null);
+
   const router = useRouter();
 
-  const handleSearch = async() => {
-    if (destination.trim() !== '') {
+  const transportOptions = ['transit', 'walking', 'driving'];
+  const transitModes = ['bus', 'train', 'subway'];
 
-      const [from,to] = destination.split(' to ');
-      
-      if(!from || !to)
-      {
-        Alert.alert('Pelase enter route as: Point A to Point B');
-        return;
-      }
-
-      const route = await fetchRoutes(from.trim(),to.trim());
-      if(!route)
-      {
-        Alert.alert('No route found');
-        return;
-      }
-      router.push({
-        pathname: '/route-detail',
-        params: { 
-          polyline: route.polyline,
-          duration: route.duration,
-          steps: JSON.stringify(route.steps),
-         },
-      });
+  const handleSearch = async () => {
+    if (!from.trim() || !to.trim()) {
+      Alert.alert('Please enter both source and destination.');
+      return;
     }
+  
+    const selectedMode = mode;
+    const selectedTransitMode = mode === 'transit' ? transitSubMode : '';
+  
+    const route = await fetchRoutes(from.trim(), to.trim(), selectedMode, selectedTransitMode);
+  
+    if (!route) {
+      Alert.alert('No route found');
+      return;
+    }
+  
+    setLatestRoute(route);
+  
+    router.push({
+      pathname: '/route-detail',
+      params: {
+        polyline: route.polyline,
+        duration: route.duration,
+        steps: JSON.stringify(route.steps),
+      },
+    });
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Text style={styles.greeting}>Hey Geetisha, where to?</Text>
 
       <TextInput
         style={styles.searchBar}
-        placeholder="Where are you going?"
+        placeholder="From"
         placeholderTextColor="#aaa"
-        value={destination}
-        onChangeText={setDestination}
+        value={from}
+        onChangeText={setFrom}
       />
+      <TextInput
+        style={styles.searchBar}
+        placeholder="To"
+        placeholderTextColor="#aaa"
+        value={to}
+        onChangeText={setTo}
+      />
+
+      <TouchableOpacity style={styles.modeButton} onPress={() => setShowModal(true)}>
+        <Text style={styles.modeText}>
+          Mode: {(transitSubMode || mode).toUpperCase()}
+        </Text>
+      </TouchableOpacity>
 
       <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
         <Text style={styles.buttonText}>Search Route</Text>
       </TouchableOpacity>
 
-      <View style={styles.quickButtonsContainer}>
-        <TouchableOpacity style={styles.quickButton}>
-          <Text style={styles.quickButtonText}>Home → Office</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.quickButton}>
-          <Text style={styles.quickButtonText}>Saved Routes</Text>
-        </TouchableOpacity>
-      </View>
-
-      <TouchableOpacity style={styles.liveMapButton} onPress={() => router.push('/map')}>
-        <Text style={styles.liveMapText}>Open Live Map</Text>
+      <TouchableOpacity style={styles.quickButton} onPress={() => router.push('/smart-suggestion')}>
+        <Text style={styles.quickButtonText}>View Smart Suggestions</Text>
       </TouchableOpacity>
 
-      <Text style={styles.sectionTitle}>Recent Searches</Text>
-      <FlatList
-        data={recentSearches}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.recentItem}>
-            <Text style={styles.recentText}>{item}</Text>
-          </TouchableOpacity>
-        )}
-      />
-        <View style={styles.quickButtonsContainer}>
-          <TouchableOpacity style={styles.quickButton} onPress={() => router.push('/smart-suggestion')}>
-            <Text style={styles.quickButtonText}>
-              View Smart Suggestions
-            </Text>
-          </TouchableOpacity>
+      <Modal visible={showModal} transparent animationType="slide">
+        <View style={styles.modalContainer}>
+          <View style={styles.modalBox}>
+            {transportOptions.map((item) => (
+              <TouchableOpacity
+                key={item}
+                onPress={() => {
+                  setMode(item);
+                  setTransitSubMode('');
+                  setShowSubOptions(item === 'transit');
+                  if (item !== 'transit') setShowModal(false);
+                }}
+                style={styles.option}
+              >
+                <Text style={styles.optionText}>{item.toUpperCase()}</Text>
+              </TouchableOpacity>
+            ))}
 
-          <TouchableOpacity style={styles.quickButton} onPress={() => router.push('/saved-routes')}>
-            <Text style={ styles.quickButtonText }>
-              View Saved Routes
-            </Text>
-          </TouchableOpacity>
+            {showSubOptions &&
+              transitModes.map((sub) => (
+                <TouchableOpacity
+                  key={sub}
+                  onPress={() => {
+                    setTransitSubMode(sub);
+                    setShowModal(false);
+                  }}
+                  style={styles.option}
+                >
+                  <Text style={styles.optionText}>→ {sub.toUpperCase()}</Text>
+                </TouchableOpacity>
+              ))}
+
+            <TouchableOpacity onPress={() => setShowModal(false)} style={styles.cancelBtn}>
+              <Text style={styles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
         </View>
+      </Modal>
 
+      <View style={styles.bottomBar}>
         <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -121,6 +142,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#121212',
     paddingHorizontal: 20,
     paddingTop: 60,
+    paddingBottom: 90,
   },
   greeting: {
     fontSize: 24,
@@ -134,7 +156,18 @@ const styles = StyleSheet.create({
     padding: 14,
     fontSize: 16,
     color: '#fff',
-    marginBottom: 10,
+    marginBottom: 12,
+  },
+  modeButton: {
+    backgroundColor: '#333',
+    padding: 14,
+    borderRadius: 10,
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  modeText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
   searchButton: {
     backgroundColor: '#00C851',
@@ -148,46 +181,51 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-  quickButtonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
   quickButton: {
     backgroundColor: '#2c2c2c',
-    padding: 12,
+    padding: 14,
     borderRadius: 10,
-    flex: 0.48,
     alignItems: 'center',
+    marginBottom: 30,
   },
   quickButtonText: {
     color: '#ccc',
     fontWeight: 'bold',
   },
-  liveMapButton: {
-    backgroundColor: '#0099ff',
-    padding: 16,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginBottom: 30,
+  bottomBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
-  liveMapText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#000000aa',
+    justifyContent: 'flex-end',
   },
-  sectionTitle: {
-    color: '#aaa',
-    fontSize: 16,
-    marginBottom: 10,
+  modalBox: {
+    backgroundColor: '#1e1e1e',
+    padding: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
-  recentItem: {
-    paddingVertical: 12,
-    borderBottomColor: '#2e2e2e',
+  option: {
+    paddingVertical: 14,
+    borderBottomColor: '#333',
     borderBottomWidth: 1,
   },
-  recentText: {
-    color: '#ccc',
-    fontSize: 15,
+  optionText: {
+    color: '#fff',
+    fontSize: 18,
+    textAlign: 'center',
+  },
+  cancelBtn: {
+    paddingVertical: 14,
+    marginTop: 10,
+  },
+  cancelText: {
+    color: '#ff4444',
+    textAlign: 'center',
+    fontWeight: 'bold',
   },
 });

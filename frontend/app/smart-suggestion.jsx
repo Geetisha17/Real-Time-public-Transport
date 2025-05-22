@@ -17,7 +17,7 @@ export default function SmartSuggestionsScreen() {
   useEffect(() => {
     const fetchSuggestions = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/api/suggestions');
+        const response = await axios.get('https://8080-geetisha17-realtimepubl-je8j9g2yf61.ws-us118.gitpod.io/api/suggestions');
         setSuggestions(response.data);
       } catch (error) {
         console.log('Suggestion fetch error:', error.message);

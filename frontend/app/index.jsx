@@ -20,7 +20,7 @@ export default function SplashScreen() {
     }).start();
 
     setTimeout(() => {
-      router.replace('/signup');
+      router.replace('/home');
     }, 2500);
   }, []);
 

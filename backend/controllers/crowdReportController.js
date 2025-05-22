@@ -2,8 +2,16 @@ const CrowdReport = require('../models/CrowdReport');
 
 exports.submitCrowdReport = async (req, res) => {
   try {
-    const report = new CrowdReport(req.body);
+    const { stopName, crowdLevel, note } = req.body;
+
+    if (!stopName || !crowdLevel) {
+      return res.status(400).json({ error: 'Stop name and crowd level are required' });
+    }
+
+    const report = new CrowdReport({  stopName: stopName.trim().toLowerCase(), crowdLevel, note });
     const saved = await report.save();
+
+    console.log("Saved:", saved);
     return res.json(saved);
   } catch (err) {
     console.error(err.message);
@@ -12,18 +20,16 @@ exports.submitCrowdReport = async (req, res) => {
 };
 
 exports.getCrowdData = async (req, res) => {
-  const { routeId, stopName } = req.query;
+  const { stopName } = req.query;
+
+  if(!stopName) return res.status(400).json({ error: 'Stop name is required' });
 
   try {
-    if (routeId) {
-      const reports = await CrowdReport.find({ routeId });
-      return res.json(reports);
-    }
-    if (stopName) {
-      const reports = await CrowdReport.find({ stopName });
-      return res.json(reports);
-    }
-    return res.status(400).json({ error: 'Provide routeId or stopName' });
+    const response = await CrowdReport.find({
+      stopName: { $regex: new RegExp(`^${stopName.trim()}$`, 'i') }
+    });
+
+    return res.json(response);
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({ error: 'Failed to fetch crowd data' });

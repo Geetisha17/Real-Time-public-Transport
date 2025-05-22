@@ -6,10 +6,11 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
-import MapView, { Marker, Callout, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker, Callout, PROVIDER_GOOGLE, MapPolyline } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import BottomNav from '../components/BottomNav';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import Polyline from '@mapbox/polyline';
 
 const dummyVehicles = [
   {
@@ -36,6 +37,11 @@ export default function LiveMapScreen() {
   const [filter, setFilter] = useState('all');
   const [activeTab, setActiveTab] = useState('map');
   const router = useRouter(); 
+  const { polyline } = useLocalSearchParams();
+
+  const decodedCoords = polyline ? 
+  Polyline.decode(polyline).map(([latitude,longitude])=> ({latitude,longitude}))
+  :[];
 
   const filteredVehicles = dummyVehicles.filter(vehicle => {
     if (filter === 'all') return true;
@@ -55,6 +61,15 @@ export default function LiveMapScreen() {
           longitudeDelta: 0.05,
         }}
       >
+        {
+          decodedCoords.length > 0 && (
+            <MapPolyline
+            coordinates={decodedCoords}
+            strokeColor='#00C851'
+            strokeWidth={5}
+            />
+          )
+        }
         {filteredVehicles.map(vehicle => (
           <Marker
             key={vehicle.id}
@@ -97,18 +112,6 @@ export default function LiveMapScreen() {
           <Text style={styles.filterText}>Metro</Text>
         </TouchableOpacity>
       </View>
-
-      {/* <View style={styles.advancedFilters}>
-        <TouchableOpacity style={styles.filterPill}>
-          <Text style={styles.filterText}>Sector 22</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.filterPill}>
-          <Text style={styles.filterText}>Cyberhub</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.filterPill}>
-          <Text style={styles.filterText}>Route 18A</Text>
-        </TouchableOpacity>
-      </View> */}
 
       <TouchableOpacity
               style={styles.floatingBtn}
