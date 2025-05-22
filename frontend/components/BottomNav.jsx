@@ -17,7 +17,7 @@ export default function BottomNav({ activeTab, setActiveTab }) {
           }}
         >
           <Ionicons
-            name="home"
+            name="home-outline"
             size={24}
             color={activeTab === 'home' ? '#00C851' : '#aaa'}
           />
@@ -29,34 +29,51 @@ export default function BottomNav({ activeTab, setActiveTab }) {
         <TouchableOpacity
           style={styles.icon}
           onPress={() => {
-            setActiveTab('favorites');
+            setActiveTab('emergency');
             router.push('/emergency');
           }}
         >
           <Ionicons
-            name="heart"
+            name="medkit-outline"
             size={24}
-            color={activeTab === 'favorites' ? '#00C851' : '#aaa'}
+            color={activeTab === 'emergency' ? '#00C851' : '#aaa'}
           />
-          <Text style={activeTab === 'favorites' ? styles.navItemActive : styles.navItem}>
-            Favorites
+          <Text style={activeTab === 'emergency' ? styles.navItemActive : styles.navItem}>
+            SOS
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.icon}
           onPress={() => {
-            setActiveTab('profile');
+            setActiveTab('alerts');
             router.push('/alerts');
           }}
         >
           <Ionicons
-            name="person"
+            name="notifications-outline"
             size={24}
-            color={activeTab === 'profile' ? '#00C851' : '#aaa'}
+            color={activeTab === 'alerts' ? '#00C851' : '#aaa'}
           />
-          <Text style={activeTab === 'profile' ? styles.navItemActive : styles.navItem}>
-            Profile
+          <Text style={activeTab === 'alerts' ? styles.navItemActive : styles.navItem}>
+            Alerts
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.icon}
+          onPress={() => {
+            setActiveTab('report');
+            router.push('/report-crowd');
+          }}
+        >
+          <Ionicons
+            name="megaphone-outline"
+            size={24}
+            color={activeTab === 'report' ? '#00C851' : '#aaa'}
+          />
+          <Text style={activeTab === 'report' ? styles.navItemActive : styles.navItem}>
+            Report
           </Text>
         </TouchableOpacity>
       </View>

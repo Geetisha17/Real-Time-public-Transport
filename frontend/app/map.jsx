@@ -89,6 +89,17 @@ export default function LiveMapScreen() {
       </View>
 
       <TouchableOpacity
+        style={styles.realtimeButton}
+        onPress={() => router.push({
+          pathname:'/realtime',
+          params: {mode:filter}
+        })}
+      >
+        <Ionicons name="megaphone-outline" size={24} color="#fff" />
+        <Text style={styles.realTimeText}>View Real-time {filter.toUpperCase()}</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
         style={styles.floatingBtn}
         onPress={() => router.push('/report-crowd')}
       >
@@ -147,4 +158,19 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
+  realtimeButton: {
+    position: 'absolute',
+    bottom: 160,
+    left: 20,
+    right: 20,
+    backgroundColor: '#0099ff',
+    padding: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+    elevation: 4,
+  },
+  realTimeText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  }
 });

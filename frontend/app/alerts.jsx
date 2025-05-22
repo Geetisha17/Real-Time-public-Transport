@@ -1,142 +1,121 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
-  Platform,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
-import MapView, {
-  Marker,
-  Callout,
-  PROVIDER_GOOGLE,
-  Polyline as MapPolyline,
-} from 'react-native-maps';
-import { Ionicons } from '@expo/vector-icons';
+import axios from 'axios';
+import { useRouter } from 'expo-router';
 import BottomNav from '../components/BottomNav';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import Polyline from '@mapbox/polyline';
 
-export default function LiveMapScreen() {
-  const [filter, setFilter] = useState('all');
-  const [activeTab, setActiveTab] = useState('map');
+
+export default function AlertsScreen() {
+  const [alerts, setAlerts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('alerts');
   const router = useRouter();
-  const { polyline, duration } = useLocalSearchParams();
 
-  const decodedCoords = polyline
-    ? Polyline.decode(polyline).map(([latitude, longitude]) => ({ latitude, longitude }))
-    : [];
+  useEffect(() => {
+    const fetchAlerts = async () => {
+      try {
+        const res = await axios.get('https://8080-geetisha17-realtimepubl-je8j9g2yf61.ws-us118.gitpod.io/api/alerts');
+        setAlerts(res.data);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching alerts:', err.message);
+        setLoading(false);
+      }
+    };
 
-  const start = decodedCoords[0];
-  const end = decodedCoords[decodedCoords.length - 1];
+    fetchAlerts();
+  }, []);
 
   return (
-    <View style={styles.container}>
-      <MapView
-        style={StyleSheet.absoluteFill}
-        provider={PROVIDER_GOOGLE}
-        showsUserLocation
-        initialRegion={{
-          latitude: start?.latitude || 28.6139,
-          longitude: start?.longitude || 77.209,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        }}
-      >
-        {decodedCoords.length > 0 && (
-          <>
-            <MapPolyline coordinates={decodedCoords} strokeColor="#00C851" strokeWidth={5} />
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.headerRow}>
+        <Text style={styles.title}>Live Alerts</Text>
+        <TouchableOpacity onPress={() => router.push('/report-alert-screen')}>
+          <Text style={styles.plus}>＋</Text>
+        </TouchableOpacity>
+      </View>
 
-            <Marker coordinate={start} title="Start">
-              <Ionicons name="location-sharp" size={28} color="#00C851" />
-            </Marker>
-
-            <Marker coordinate={end} title="End">
-              <Ionicons name="flag-sharp" size={28} color="#ff4444" />
-            </Marker>
-          </>
-        )}
-      </MapView>
-
-      {duration && (
-        <View style={styles.durationBox}>
-          <Text style={styles.durationText}>Est. Time: {duration}</Text>
-        </View>
+      {loading ? (
+        <ActivityIndicator size="large" color="#00C851" />
+      ) : alerts.length === 0 ? (
+        <Text style={{ color: '#aaa' }}>No alerts found.</Text>
+      ) : (
+        alerts.map((alert, i) => (
+          <View key={i} style={styles.alertCard}>
+            <Text style={styles.alertType}>{alert.type.toUpperCase()}</Text>
+            <Text style={styles.alertMessage}>{alert.message}</Text>
+            <Text style={styles.alertLocation}>Location: {alert.location}</Text>
+            <Text style={styles.alertTime}>{new Date(alert.timestamp).toLocaleString()}</Text>
+          </View>
+        ))
       )}
 
-      <View style={styles.filterBar}>
-        <TouchableOpacity onPress={() => setFilter('all')} style={styles.filterButton}>
-          <Text style={styles.filterText}>All</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setFilter('bus')} style={styles.filterButton}>
-          <Text style={styles.filterText}>Bus</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setFilter('metro')} style={styles.filterButton}>
-          <Text style={styles.filterText}>Metro</Text>
-        </TouchableOpacity>
-      </View>
-
-      <TouchableOpacity
-        style={styles.floatingBtn}
-        onPress={() => router.push('/report-crowd')}
-      >
-        <Ionicons name="megaphone-outline" size={24} color="#fff" />
-        <Text style={styles.floatingText}>Report Crowd</Text>
-      </TouchableOpacity>
-
-      <View style={styles.bottomNavWrapper}>
+      <View style={styles.bottomBar}>
         <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  durationBox: {
-    position: 'absolute',
-    top: 40,
-    alignSelf: 'center',
-    backgroundColor: '#1e1e1e',
-    paddingVertical: 6,
-    paddingHorizontal: 16,
-    borderRadius: 20,
+  container: {
+    backgroundColor: '#121212',
+    padding: 20,
+    minHeight: '100%',
   },
-  durationText: {
-    color: '#00C851',
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+    marginTop: 40,
+  },
+  title: {
+    fontSize: 22,
+    color: '#fff',
     fontWeight: 'bold',
   },
-  filterBar: {
-    position: 'absolute',
-    top: 90,
-    alignSelf: 'center',
-    flexDirection: 'row',
-    gap: 12,
+  plus: {
+    fontSize: 28,
+    color: '#00C851',
+    paddingRight: 4,
   },
-  filterButton: {
+  alertCard: {
     backgroundColor: '#1e1e1e',
-    padding: 10,
-    borderRadius: 8,
-  },
-  filterText: {
-    color: '#ccc',
-  },
-  floatingBtn: {
-    position: 'absolute',
-    bottom: 100,
-    right: 20,
-    backgroundColor: '#00C851',
     padding: 14,
-    borderRadius: 30,
-    alignItems: 'center',
+    borderRadius: 12,
+    marginBottom: 16,
   },
-  floatingText: {
+  alertType: {
+    color: '#00C851',
+    fontWeight: 'bold',
+    fontSize: 14,
+    marginBottom: 4,
+  },
+  alertMessage: {
     color: '#fff',
-    marginTop: 6,
+    fontSize: 16,
+    marginBottom: 4,
   },
-  bottomNavWrapper: {
+  alertLocation: {
+    color: '#ccc',
+    marginBottom: 2,
+  },
+  alertTime: {
+    color: '#777',
+    fontSize: 12,
+  },
+  bottomBar: {
     position: 'absolute',
     bottom: 0,
-    width: '100%',
+    left: 0,
+    right: 0,
   },
 });

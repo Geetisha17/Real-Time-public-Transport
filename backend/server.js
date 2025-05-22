@@ -16,6 +16,8 @@ app.use('/api/crowd', require('./routes/crowd'));
 app.use('/api/alerts', require('./routes/alertRoutes'));
 app.use('/api/nearby',require('./routes/nearbyRoutes'));
 app.use('/api/realtime',require('./routes/realtimeRoutes'));
+app.use('/api/location', require('./routes/locationRoutes'));
+app.use('/api/static', require('./routes/staticRoute'));
 
 
 const PORT = process.env.PORT || 8080;

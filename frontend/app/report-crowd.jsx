@@ -11,11 +11,14 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
+import BottomNav from '../components/BottomNav';
+
 
 export default function ReportCrowdScreen() {
   const [selectedLevel, setSelectedLevel] = useState(null);
   const [note, setNote] = useState('');
   const [stopName,setStopName] = useState('');
+  const [activeTab, setActiveTab] = useState('report');
   const router = useRouter();
 
   const handleSubmit = async () => {
@@ -102,6 +105,10 @@ export default function ReportCrowdScreen() {
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
         <Text style={styles.submitText}>Submit</Text>
       </TouchableOpacity>
+
+      <View style={styles.bottomBar}>
+        <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
+      </View>
     </View>
   );
 }
@@ -162,5 +169,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  bottomBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
 });

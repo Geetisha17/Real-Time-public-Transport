@@ -9,12 +9,14 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import * as Location from 'expo-location';
+import BottomNav from '../components/BottomNav';
 import axios from 'axios';
 
 export default function EmergencyScreen() {
   const [location, setLocation] = useState(null);
   const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('emergency');
 
   const categories = ['hospital', 'police', 'doctor'];
 
@@ -74,6 +76,9 @@ export default function EmergencyScreen() {
           </View>
         ))
       )}
+      <View style={styles.bottomBar}>
+          <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
+      </View>
     </ScrollView>
   );
 }
@@ -90,6 +95,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginBottom: 20,
     textAlign: 'center',
+    marginTop:30,
   },
   card: {
     backgroundColor: '#1e1e1e',
@@ -116,5 +122,11 @@ const styles = StyleSheet.create({
   callText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  bottomBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
 });

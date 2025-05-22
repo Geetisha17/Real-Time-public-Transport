@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+    environment:
+      - REDIS_URL=redis://redis:6379
+  redis:
+    image: redis/redis-stack:latest
+    ports:
+      - "6379:6379"
+      - "8081:8081"

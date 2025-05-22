@@ -74,7 +74,7 @@ export default function HomeScreen() {
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <Text style={styles.greeting}>Hey Geetisha, where to?</Text>
+      <Text style={styles.greeting}>Hey, where to?</Text>
 
       <TextInput
         style={styles.searchBar}
@@ -104,10 +104,6 @@ export default function HomeScreen() {
       <TouchableOpacity style={styles.mapButton} onPress={handleMap}>
         <Text style={styles.buttonText}>View Route In Map</Text>
       </TouchableOpacity>
-
-      {/* <TouchableOpacity style={styles.quickButton} onPress={() => router.push('/')}>
-        <Text style={styles.quickButtonText}>View Smart Suggestions</Text>
-      </TouchableOpacity> */}
 
       <Modal visible={showModal} transparent animationType="slide">
         <View style={styles.modalContainer}>
