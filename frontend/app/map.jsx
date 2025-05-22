@@ -1,52 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  Platform,
 } from 'react-native';
-import MapView, { Marker, Callout, PROVIDER_GOOGLE, MapPolyline } from 'react-native-maps';
+import MapView, { Marker, Polyline as MapPolyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import BottomNav from '../components/BottomNav';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import Polyline from '@mapbox/polyline';
-
-const dummyVehicles = [
-  {
-    id: 1,
-    title: 'Bus #102',
-    latitude: 28.6139,
-    longitude: 77.209,
-    speed: '45 km/h',
-    crowd: 'Moderate',
-    eta: '5 mins',
-  },
-  {
-    id: 2,
-    title: 'Metro #Blue',
-    latitude: 28.62,
-    longitude: 77.21,
-    speed: '60 km/h',
-    crowd: 'Crowded',
-    eta: '3 mins',
-  },
-];
+import axios from 'axios';
+import * as Location from 'expo-location';
 
 export default function LiveMapScreen() {
   const [filter, setFilter] = useState('all');
   const [activeTab, setActiveTab] = useState('map');
-  const router = useRouter(); 
+  const [stations, setStations] = useState([]);
+  const [location, setLocation] = useState(null);
+  const router = useRouter();
   const { polyline } = useLocalSearchParams();
 
-  const decodedCoords = polyline ? 
-  Polyline.decode(polyline).map(([latitude,longitude])=> ({latitude,longitude}))
-  :[];
+  const decodedCoords = polyline
+    ? Polyline.decode(polyline).map(([latitude, longitude]) => ({ latitude, longitude }))
+    : [];
 
-  const filteredVehicles = dummyVehicles.filter(vehicle => {
-    if (filter === 'all') return true;
-    return vehicle.title.toLowerCase().includes(filter);
-  });
+  useEffect(() => {
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        alert('Location permission not granted');
+        return;
+      }
+
+      const loc = await Location.getCurrentPositionAsync({});
+      setLocation(loc.coords);
+      fetchNearbyTransit(loc.coords.latitude, loc.coords.longitude, filter);
+    })();
+  }, [filter]);
+
+  const fetchNearbyTransit = async (lat, lng, type) => {
+    try {
+      const res = await axios.get('https://8080-geetisha17-realtimepubl-je8j9g2yf61.ws-us118.gitpod.io/api/nearby', {
+        params: { lat, lng, type },
+      });
+      setStations(res.data);
+    } catch (err) {
+      console.error('Transit fetch error:', err.message);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -54,76 +56,41 @@ export default function LiveMapScreen() {
         style={StyleSheet.absoluteFill}
         provider={PROVIDER_GOOGLE}
         showsUserLocation
-        initialRegion={{
-          latitude: 28.6139,
-          longitude: 77.209,
+        region={location ? {
+          latitude: location.latitude,
+          longitude: location.longitude,
           latitudeDelta: 0.05,
           longitudeDelta: 0.05,
-        }}
+        } : undefined}
       >
-        {
-          decodedCoords.length > 0 && (
-            <MapPolyline
-            coordinates={decodedCoords}
-            strokeColor='#00C851'
-            strokeWidth={5}
-            />
-          )
-        }
-        {filteredVehicles.map(vehicle => (
+        {decodedCoords.length > 0 && (
+          <MapPolyline coordinates={decodedCoords} strokeColor="#00C851" strokeWidth={5} />
+        )}
+
+        {stations.map((station, idx) => (
           <Marker
-            key={vehicle.id}
+            key={idx}
             coordinate={{
-              latitude: vehicle.latitude,
-              longitude: vehicle.longitude,
+              latitude: station.geometry.location.lat,
+              longitude: station.geometry.location.lng,
             }}
-          >
-            <Callout
-              tooltip
-              onPress={() =>
-                router.push({
-                  pathname: '/route-detail',
-                  params: { route: vehicle.title },
-                })
-              }
-            >
-              <View style={styles.callout}>
-                <Text style={styles.calloutTitle}>{vehicle.title}</Text>
-                <Text>Speed: {vehicle.speed}</Text>
-                <Text>Crowd: {vehicle.crowd}</Text>
-                <Text>ETA: {vehicle.eta}</Text>
-                <Text style={{ color: '#00C851', marginTop: 6 }}>
-                  Tap for Route Details
-                </Text>
-              </View>
-            </Callout>
-          </Marker>
+            title={station.name}
+            description={station.vicinity}
+          />
         ))}
       </MapView>
 
       <View style={styles.filterBar}>
-        <TouchableOpacity onPress={() => setFilter('all')} style={styles.filterButton}>
-          <Text style={styles.filterText}>All</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setFilter('bus')} style={styles.filterButton}>
-          <Text style={styles.filterText}>Bus</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setFilter('metro')} style={styles.filterButton}>
-          <Text style={styles.filterText}>Metro</Text>
-        </TouchableOpacity>
+        {['all', 'bus', 'metro', 'train'].map((type) => (
+          <TouchableOpacity key={type} onPress={() => setFilter(type)} style={styles.filterButton}>
+            <Text style={styles.filterText}>{type.toUpperCase()}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
       <TouchableOpacity
-              style={styles.floatingBtn}
-              onPress={() => router.push('/report-crowd')}
-            >
-              <Ionicons name="megaphone-outline" size={24} color="#fff" />
-              <Text style={styles.floatingText}>Report Crowd</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
         style={styles.floatingBtn}
-        onPress={() => router.push('/report-crowd')}  
+        onPress={() => router.push('/report-crowd')}
       >
         <Ionicons name="megaphone-outline" size={24} color="#fff" />
         <Text style={styles.floatingText}>Report Crowd</Text>
@@ -137,94 +104,47 @@ export default function LiveMapScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  callout: {
-    backgroundColor: 'white',
-    padding: 10,
-    borderRadius: 10,
-    width: 160,
-    elevation: 4,
-  },
-  calloutTitle: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    marginBottom: 4,
+  container: {
+    flex: 1,
+    backgroundColor: '#121212',
   },
   filterBar: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 60 : 40,
-    left: 20,
-    right: 20,
+    top: 50,
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: '#fff',
+    alignSelf: 'center',
+    backgroundColor: '#1e1e1e',
     borderRadius: 20,
-    padding: 10,
-    elevation: 4,
+    padding: 8,
+    zIndex: 10,
   },
-  filterButton: { paddingHorizontal: 10 },
+  filterButton: {
+    marginHorizontal: 8,
+  },
   filterText: {
+    color: '#fff',
     fontWeight: 'bold',
-    color: '#333',
   },
   floatingBtn: {
     position: 'absolute',
-    bottom: 110,
     right: 20,
+    bottom: 100,
     backgroundColor: '#00C851',
     flexDirection: 'row',
-    alignItems: 'center',
     padding: 12,
-    borderRadius: 30,
-    elevation: 5,
+    borderRadius: 25,
+    alignItems: 'center',
+    elevation: 6,
   },
   floatingText: {
     color: '#fff',
     fontWeight: 'bold',
     marginLeft: 8,
   },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: '#000000aa',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalBox: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 20,
-    width: '80%',
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  close: {
-    color: '#00C851',
-    marginTop: 20,
-    fontWeight: 'bold',
-  },
   bottomNavWrapper: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-  },
-  advancedFilters: {
-    position: 'absolute',
-    top: Platform.OS === 'ios' ? 120 : 100,
-    left: 20,
-    right: 20,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  filterPill: {
-    backgroundColor: '#222',
-    borderRadius: 20,
-    paddingVertical: 6,
-    paddingHorizontal: 14,
   },
 });

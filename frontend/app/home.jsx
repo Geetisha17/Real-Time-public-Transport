@@ -57,6 +57,21 @@ export default function HomeScreen() {
     });
   };
 
+  const handleMap =()=>{
+    if(!latestRoute) 
+    {
+      Alert.alert("Please search for a route")
+      return;
+    }
+    router.push({
+      pathname: '/map',
+      params:{
+        polyline: latestRoute.polyline,
+        duration: latestRoute.duration,
+      },
+    });
+  };
+
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Text style={styles.greeting}>Hey Geetisha, where to?</Text>
@@ -86,9 +101,13 @@ export default function HomeScreen() {
         <Text style={styles.buttonText}>Search Route</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.quickButton} onPress={() => router.push('/smart-suggestion')}>
-        <Text style={styles.quickButtonText}>View Smart Suggestions</Text>
+      <TouchableOpacity style={styles.mapButton} onPress={handleMap}>
+        <Text style={styles.buttonText}>View Route In Map</Text>
       </TouchableOpacity>
+
+      {/* <TouchableOpacity style={styles.quickButton} onPress={() => router.push('/')}>
+        <Text style={styles.quickButtonText}>View Smart Suggestions</Text>
+      </TouchableOpacity> */}
 
       <Modal visible={showModal} transparent animationType="slide">
         <View style={styles.modalContainer}>
@@ -171,6 +190,13 @@ const styles = StyleSheet.create({
   },
   searchButton: {
     backgroundColor: '#00C851',
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  mapButton:{
+    backgroundColor: '#1E88E5',
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: 'center',

@@ -12,8 +12,10 @@ app.use(express.json());
 
 app.use('/api/emergency', require('./routes/emergencyRoutes'));
 app.use('/api/route', require('./routes/routeSearch'));
-app.use('/api/suggestions', require('./routes/suggestions'));
 app.use('/api/crowd', require('./routes/crowd'));
+app.use('/api/alerts', require('./routes/alertRoutes'));
+app.use('/api/nearby',require('./routes/nearbyRoutes'));
+app.use('/api/realtime',require('./routes/realtimeRoutes'));
 
 
 const PORT = process.env.PORT || 8080;

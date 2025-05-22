@@ -19,7 +19,6 @@ export const fetchRoutes = async (from, to, mode = 'transit', transit_mode = '')
       }
   
       const bestRoute = data.routes[0];
-      console.log("ROUTE DETAILS:", JSON.stringify(bestRoute, null, 2)); // Debug line
   
       const polyline = bestRoute?.overview_polyline?.points || '';
       const duration = bestRoute?.legs?.[0]?.duration?.text || 'Unknown';

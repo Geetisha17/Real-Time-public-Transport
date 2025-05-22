@@ -47,7 +47,7 @@ export default function BottomNav({ activeTab, setActiveTab }) {
           style={styles.icon}
           onPress={() => {
             setActiveTab('profile');
-            router.push('/profile');
+            router.push('/alerts');
           }}
         >
           <Ionicons
