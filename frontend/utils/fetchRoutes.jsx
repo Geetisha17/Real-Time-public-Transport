@@ -24,7 +24,7 @@ export const fetchRoutes = async (from, to, mode = 'transit', transit_mode = '')
       const duration = bestRoute?.legs?.[0]?.duration?.text || 'Unknown';
       const steps = bestRoute?.legs?.[0]?.steps || [];
   
-      return { polyline, duration, steps };
+      return { polyline, duration, steps ,from ,to };
     } catch (err) {
       console.log("ERROR FETCHING ROUTE:", err.message);
       return null;

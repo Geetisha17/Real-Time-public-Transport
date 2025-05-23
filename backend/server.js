@@ -18,6 +18,7 @@ app.use('/api/nearby',require('./routes/nearbyRoutes'));
 app.use('/api/realtime',require('./routes/realtimeRoutes'));
 app.use('/api/location', require('./routes/locationRoutes'));
 app.use('/api/static', require('./routes/staticRoute'));
+app.use('/api/codeName',require('./routes/getcodeNameRoutes'));
 
 app.get('/', (req, res) => {
     res.send('Welcome to the API Server!');

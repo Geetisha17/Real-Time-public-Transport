@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -19,40 +19,48 @@ export default function LiveMapScreen() {
   const [stations, setStations] = useState([]);
   const [location, setLocation] = useState(null);
   const router = useRouter();
-  const { polyline } = useLocalSearchParams();
+  const mapRef = useRef(null);
+  const { polyline , from } = useLocalSearchParams();
 
   const decodedCoords = polyline
     ? Polyline.decode(polyline).map(([latitude, longitude]) => ({ latitude, longitude }))
     : [];
 
   useEffect(() => {
-    (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        alert('Location permission not granted');
-        return;
-      }
+    if(from)
+    {
+      fetchNearbyTransit(from,filter);
+    }
+  }, [filter,from]);
 
-      const loc = await Location.getCurrentPositionAsync({});
-      setLocation(loc.coords);
-      fetchNearbyTransit(loc.coords.latitude, loc.coords.longitude, filter);
-    })();
-  }, [filter]);
-
-  const fetchNearbyTransit = async (lat, lng, type) => {
+  const fetchNearbyTransit = async (place,type) => {
     try {
-      const res = await axios.get('https://8080-geetisha17-realtimepubl-je8j9g2yf61.ws-us119.gitpod.io/api/nearby', {
-        params: { lat, lng, type },
+      const res = await axios.get('https://8080-geetisha17-realtimepubl-je8j9g2yf61.ws-us119.gitpod.io/api/codeName', {
+        params: { place,type },
       });
       setStations(res.data);
     } catch (err) {
       console.error('Transit fetch error:', err.message);
     }
   };
+  useEffect(() => {
+    if (mapRef.current && decodedCoords.length > 0) {
+      mapRef.current.fitToCoordinates(decodedCoords, {
+        edgePadding: {
+          top: 100,
+          right: 100,
+          bottom: 100,
+          left: 100,
+        },
+        animated: true,
+      });
+    }
+  }, [decodedCoords]);
 
   return (
     <View style={styles.container}>
       <MapView
+        ref={mapRef}
         style={StyleSheet.absoluteFill}
         provider={PROVIDER_GOOGLE}
         showsUserLocation
@@ -71,8 +79,8 @@ export default function LiveMapScreen() {
           <Marker
             key={idx}
             coordinate={{
-              latitude: station.geometry.location.lat,
-              longitude: station.geometry.location.lng,
+              latitude: station.location.lat,
+              longitude: station.location.lng,
             }}
             title={station.name}
             description={station.vicinity}

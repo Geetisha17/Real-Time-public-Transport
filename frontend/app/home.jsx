@@ -68,6 +68,8 @@ export default function HomeScreen() {
       params:{
         polyline: latestRoute.polyline,
         duration: latestRoute.duration,
+        from: latestRoute.from,
+        to: latestRoute.to
       },
     });
   };
