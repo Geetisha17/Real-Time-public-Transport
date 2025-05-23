@@ -19,6 +19,8 @@ app.use('/api/realtime',require('./routes/realtimeRoutes'));
 app.use('/api/location', require('./routes/locationRoutes'));
 app.use('/api/static', require('./routes/staticRoute'));
 
-
+app.get('/', (req, res) => {
+    res.send('Welcome to the API Server!');
+  });
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

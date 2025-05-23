@@ -17,8 +17,9 @@ export default function EmergencyScreen() {
   const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('emergency');
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
-  const categories = ['hospital', 'police', 'doctor'];
+  const categories = ['all', 'hospital', 'police', 'doctor'];
 
   useEffect(() => {
     (async () => {
@@ -33,7 +34,7 @@ export default function EmergencyScreen() {
 
       try {
         const res = await axios.get(
-          'https://8080-geetisha17-realtimepubl-je8j9g2yf61.ws-us118.gitpod.io/api/emergency',
+          'https://8080-geetisha17-realtimepubl-je8j9g2yf61.ws-us119.gitpod.io/api/emergency',
           {
             params: {
               lat: loc.coords.latitude,
@@ -60,13 +61,37 @@ export default function EmergencyScreen() {
     }
   };
 
+  const filteredPlaces = selectedCategory === 'all'
+    ? places
+    : places.filter((p) => p.types?.includes(selectedCategory));
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Emergency Help Near You</Text>
+
+      <View style={styles.filterBar}>
+        {categories.map((cat) => (
+          <TouchableOpacity
+            key={cat}
+            style={[
+              styles.filterButton,
+              selectedCategory === cat && styles.activeFilter,
+            ]}
+            onPress={() => setSelectedCategory(cat)}
+          >
+            <Text style={styles.filterText}>{cat.toUpperCase()}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
       {loading ? (
         <ActivityIndicator color="#00C851" size="large" />
+      ) : filteredPlaces.length === 0 ? (
+        <Text style={{ color: '#aaa', marginTop: 20, textAlign: 'center' }}>
+          No results found for "{selectedCategory}"
+        </Text>
       ) : (
-        places.map((place, i) => (
+        filteredPlaces.map((place, i) => (
           <View key={i} style={styles.card}>
             <Text style={styles.name}>{place.name}</Text>
             <Text style={styles.address}>{place.vicinity}</Text>
@@ -76,8 +101,9 @@ export default function EmergencyScreen() {
           </View>
         ))
       )}
+
       <View style={styles.bottomBar}>
-          <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
+        <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
       </View>
     </ScrollView>
   );
@@ -87,6 +113,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#121212',
     padding: 20,
+    paddingBottom: 100,
     minHeight: '100%',
   },
   title: {
@@ -95,7 +122,26 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginBottom: 20,
     textAlign: 'center',
-    marginTop:30,
+    marginTop: 30,
+  },
+  filterBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 16,
+  },
+  filterButton: {
+    backgroundColor: '#2c2c2c',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  activeFilter: {
+    backgroundColor: '#00C851',
+  },
+  filterText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 13,
   },
   card: {
     backgroundColor: '#1e1e1e',

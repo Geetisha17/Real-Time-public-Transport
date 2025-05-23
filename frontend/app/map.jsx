@@ -41,7 +41,7 @@ export default function LiveMapScreen() {
 
   const fetchNearbyTransit = async (lat, lng, type) => {
     try {
-      const res = await axios.get('https://8080-geetisha17-realtimepubl-je8j9g2yf61.ws-us118.gitpod.io/api/nearby', {
+      const res = await axios.get('https://8080-geetisha17-realtimepubl-je8j9g2yf61.ws-us119.gitpod.io/api/nearby', {
         params: { lat, lng, type },
       });
       setStations(res.data);

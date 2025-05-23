@@ -22,7 +22,7 @@ export default function RouteDetailScreen() {
 
         const responses = await Promise.all(
           uniqueStops.map(stop =>
-            axios.get(`https://8080-geetisha17-realtimepubl-je8j9g2yf61.ws-us118.gitpod.io/api/crowd?stopName=${encodeURIComponent(stop)}`)
+            axios.get(`https://8080-geetisha17-realtimepubl-je8j9g2yf61.ws-us119.gitpod.io/api/crowd?stopName=${encodeURIComponent(stop)}`)
           )
         );
 

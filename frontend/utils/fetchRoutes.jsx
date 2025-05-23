@@ -5,7 +5,7 @@ export const fetchRoutes = async (from, to, mode = 'transit', transit_mode = '')
       console.log("Fetching routes", from, "to:", to, "mode:", mode, "transit_mode:", transit_mode);
   
       const res = await axios.get(
-        'https://8080-geetisha17-realtimepubl-je8j9g2yf61.ws-us118.gitpod.io/api/route',
+        'https://8080-geetisha17-realtimepubl-je8j9g2yf61.ws-us119.gitpod.io/api/route',
         {
           params: { from, to, mode, transit_mode },
         }

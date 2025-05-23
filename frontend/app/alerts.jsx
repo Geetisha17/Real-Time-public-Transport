@@ -21,7 +21,7 @@ export default function AlertsScreen() {
   useEffect(() => {
     const fetchAlerts = async () => {
       try {
-        const res = await axios.get('https://8080-geetisha17-realtimepubl-je8j9g2yf61.ws-us118.gitpod.io/api/alerts');
+        const res = await axios.get('https://8080-geetisha17-realtimepubl-je8j9g2yf61.ws-us119.gitpod.io/api/alerts');
         setAlerts(res.data);
         setLoading(false);
       } catch (err) {

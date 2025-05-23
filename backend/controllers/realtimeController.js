@@ -1,8 +1,16 @@
 const axios = require('axios');
 const GtfsRealtimeBindings = require('gtfs-realtime-bindings');
+const redisClient = require('../config/redisClient');
 
 exports.getRealtimeData = async (req, res) => {
   try {
+    const cacheKey = 'realtime_vehicles';
+    const cached = await redisClient.get(cacheKey);
+
+    if (cached) {
+      return res.json({ vehicles: JSON.parse(cached) });
+    }
+
     const apiKey = process.env.OTD_API_KEY;
     const url = `https://otd.delhi.gov.in/api/realtime/VehiclePositions.pb?key=${apiKey}`;
 
@@ -26,6 +34,8 @@ exports.getRealtimeData = async (req, res) => {
         timestamp: vehicle.timestamp?.low || null,
       };
     });
+
+    await redisClient.set(cacheKey, JSON.stringify(vehicles), { EX: 15 });
 
     res.json({ vehicles });
   } catch (error) {

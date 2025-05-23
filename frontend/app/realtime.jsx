@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TextInput } from 'react-native';
 import axios from 'axios';
 import { useLocalSearchParams } from 'expo-router';
 
@@ -13,7 +13,7 @@ export default function RealtimeScreen() {
   useEffect(() => {
     const fetchRealtime = async () => {
       try {
-        const res = await axios.get(`https://8080-geetisha17-realtimepubl-je8j9g2yf61.ws-us118.gitpod.io/api/realtime?mode=${mode}`);
+        const res = await axios.get(`https://8080-geetisha17-realtimepubl-je8j9g2yf61.ws-us119.gitpod.io/api/realtime?mode=${mode}`);
         const data = res.data.vehicles || [];
         setVehicles(data);
 
@@ -22,7 +22,7 @@ export default function RealtimeScreen() {
           data.map(async (v) => {
             if (!v.latitude || !v.longitude) return { id: v.id, address: 'Unknown' };
             try {
-              const locRes = await axios.get(`https://8080-geetisha17-realtimepubl-je8j9g2yf61.ws-us118.gitpod.io/api/location/place-name`, {
+              const locRes = await axios.get(`https://8080-geetisha17-realtimepubl-je8j9g2yf61.ws-us119.gitpod.io/api/location/place-name`, {
                 params: { lat: v.latitude, lng: v.longitude },
               });
               return { id: v.id, address: locRes.data.address || 'Unknown' };
@@ -42,7 +42,7 @@ export default function RealtimeScreen() {
         const routeRes = await Promise.all(
           uniqueRouteIds.map(async (id) => {
             try {
-              const r = await axios.get(`https://8080-geetisha17-realtimepubl-je8j9g2yf61.ws-us118.gitpod.io/api/static/route-name`, {
+              const r = await axios.get(`https://8080-geetisha17-realtimepubl-je8j9g2yf61.ws-us119.gitpod.io/api/static/route-name`, {
                 params: { routeId: id },
               });
               return { id, name: r.data.name || id };
